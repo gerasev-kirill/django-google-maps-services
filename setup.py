@@ -20,7 +20,8 @@ setup(
     author_email='gerasev.kirill@gmail.com',
     install_requires=[
         'Django>=1.11',
-        'googlemaps>=2.5.0'
+        'googlemaps>=2.5.0',
+        'jsonfield'
     ],
     classifiers=[
         'Environment :: Web Environment',
