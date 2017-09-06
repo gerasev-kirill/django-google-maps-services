@@ -12,6 +12,7 @@ ERROR_MSGS.update(GMapClient.map_error_msgs)
 class TestGmapHelper(TestCase):
     def setUp(self):
         self.G = GMapClient()
+        self.h_len = len(gmap_history)
 
     def test_fail_decode(self):
         # invalid input type 'float'
@@ -34,40 +35,39 @@ class TestGmapHelper(TestCase):
         )
 
     def test_geocode(self):
-        self.assertEqual(len(gmap_history), 0)
         # fetch single
         self.G.geocode('Amsterdam')
-        self.assertEqual(len(gmap_history), 1)
+        self.assertEqual(len(gmap_history), self.h_len+1)
 
 
         # fetch from cache
         self.G.geocode('Amsterdam')
-        self.assertEqual(len(gmap_history), 1)
+        self.assertEqual(len(gmap_history), self.h_len+1)
 
 
         # ignore cache
         self.G.geocode('Amsterdam', ignore_cache=True)
-        self.assertEqual(len(gmap_history), 2)
+        self.assertEqual(len(gmap_history), self.h_len+2)
         self.assertEqual(
-            gmap_history[1].action,
+            gmap_history[self.h_len+1].action,
             'geocode'
         )
         self.assertEqual(
-            gmap_history[1].args,
+            gmap_history[self.h_len+1].args,
             ('Amsterdam',)
         )
 
 
         # fetch multiple locations
         res = self.G.geocode(['Paris', 'Amsterdam'])
-        self.assertEqual(len(gmap_history), 3)
+        self.assertEqual(len(gmap_history), self.h_len+3)
         # only 'Paris', 'Amsterdam' we have in cache
         self.assertEqual(
-            gmap_history[2].action,
+            gmap_history[self.h_len+2].action,
             'geocode'
         )
         self.assertEqual(
-            gmap_history[2].args,
+            gmap_history[self.h_len+2].args,
             ('Paris',)
         )
         # paris coordinates
@@ -92,4 +92,4 @@ class TestGmapHelper(TestCase):
 
         # fetch multiple locations from cache
         res = self.G.geocode(['Paris', 'Amsterdam'])
-        self.assertEqual(len(gmap_history), 3)
+        self.assertEqual(len(gmap_history), self.h_len+3)

@@ -10,6 +10,7 @@ DJANGO_GC_MAP_POINT_PRECISION = 7
 
 class GMapPointCache(models.Model):
     id = models.CharField(max_length=300, primary_key=True)
+    created = models.DateTimeField(auto_now_add=True)
     lat = models.DecimalField(
         max_digits=2+DJANGO_GC_MAP_POINT_PRECISION,
         decimal_places=DJANGO_GC_MAP_POINT_PRECISION
@@ -18,4 +19,14 @@ class GMapPointCache(models.Model):
         max_digits=2+DJANGO_GC_MAP_POINT_PRECISION,
         decimal_places=DJANGO_GC_MAP_POINT_PRECISION
     )
+    data = JSONField(default=[])
+
+
+
+class GMapDirectionCache(models.Model):
+    id = models.CharField(
+        max_length=(4+2+DJANGO_GC_MAP_POINT_PRECISION)*25+2+10,
+        primary_key=True
+    )
+    created = models.DateTimeField(auto_now_add=True)
     data = JSONField(default=[])

@@ -66,3 +66,10 @@ class BaseGMap(object):
         format_str = "%."+str(abs(DJANGO_GC_MAP_POINT_PRECISION))+"f"
         value = format_str % value
         return Decimal(value)
+
+    def _location_to_str(self, value):
+        if not value:
+            return ''
+        if isinstance(value, six.string_types) or isinstance(value, six.text_type):
+            return value
+        return googlemaps.convert.latlng(value)

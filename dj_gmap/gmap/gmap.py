@@ -4,11 +4,11 @@ from django.utils import six
 import json
 
 from .base import BaseGMap
-from ..models import GMapPointCache
+from ..models import GMapPointCache, GMapDirectionCache
 from .. import exceptions
 
 
-
+bool_to_str = lambda x: 'Yes' if x else 'No'
 
 
 class GMapClient(BaseGMap):
@@ -118,3 +118,30 @@ class GMapClient(BaseGMap):
         if isinstance(points, (list, tuple)):
             return decoded
         return decoded[0]
+
+
+
+    def directions(self, origin, destination,
+                   waypoints=None, optimize_waypoints=True,
+                   mode='driving', ignore_cache=False, **kwargs):
+        if not ignore_cache:
+            id = [mode, bool_to_str(optimize_waypoints), self._location_to_str(origin)]
+            for w in waypoints or []:
+                id.append(self._location_to_str(w))
+            id.append(self._location_to_str(destination))
+            id = '#' + '#'.join(id) + '#'
+            try:
+                point = GMapDirectionCache.objects.get(id=id)
+                return point.data
+            except GMapDirectionCache.DoesNotExist:
+                pass
+
+        direction = self._run_gmap_command(
+            'directions',
+            origin, destination,
+            waypoints=waypoints, optimize_waypoints=optimize_waypoints,
+            mode=mode, **kwargs
+        )
+        if direction and not ignore_cache:
+            GMapDirectionCache.objects.create(id=id, data=direction)
+        return direction
