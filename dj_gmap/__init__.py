@@ -1,4 +1,8 @@
 
+MARKER_NAMED_COLORS = [
+    'red', 'blue', 'green', 'orange', 'purple',
+    'black', 'brown', 'yellow', 'gray', 'white'
+]
 
 
 

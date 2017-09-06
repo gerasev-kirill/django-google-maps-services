@@ -10,10 +10,7 @@ from .base import BaseGMap
 
 
 
-NAMED_MARKER_COLORS = [
-    'red', 'blue', 'green', 'orange', 'purple',
-    'black', 'brown', 'yellow', 'gray', 'white'
-]
+
 
 
 class GMapStaticCanvas(object):
