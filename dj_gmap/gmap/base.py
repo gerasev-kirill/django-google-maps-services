@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import googlemaps, time, sys
 from django.conf import settings
 from django.utils import six
