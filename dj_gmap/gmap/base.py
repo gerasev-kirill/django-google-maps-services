@@ -4,12 +4,13 @@ import googlemaps, time, sys
 from django.conf import settings
 from django.utils import six
 from decimal import Decimal
-
 from ..models import DJANGO_GC_MAP_POINT_PRECISION
 
 
 
+DECIMAL_FORMAT_STR = "%."+str(abs(DJANGO_GC_MAP_POINT_PRECISION))+"f"
 IS_TESTING_MODE = sys.argv[1:2] == ['test']
+
 if IS_TESTING_MODE:
     history = []
     class HistoryObject(object):
@@ -62,8 +63,7 @@ class BaseGMap(object):
         if isinstance(value, six.text_type) or isinstance(value, six.string_types):
             value = float(value)
         value = value or 0
-        format_str = "%."+str(abs(DJANGO_GC_MAP_POINT_PRECISION))+"f"
-        value = format_str % value
+        value = DECIMAL_FORMAT_STR % value
         return Decimal(value)
 
     def _location_to_str(self, value):
