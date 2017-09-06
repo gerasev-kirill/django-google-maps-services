@@ -9,8 +9,8 @@ except:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='django-google-maps-helpers',
-    version='0.0.1',
+    name='django-google-maps-services',
+    version='0.0.2',
     packages=['dj_gmap'],
     include_package_data=True,
     license='BSD License',
