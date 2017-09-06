@@ -26,12 +26,11 @@ class BaseGMap(object):
         'no_key': "Provide api key in settings.py. Variable 'DJANGO_GC_MAP_API_KEY'"
     }
 
-    def __init__(self, key=None, config=None):
+    def __init__(self, key=None, **kwargs):
         if not key:
             key = getattr(settings, 'DJANGO_GC_MAP_API_KEY', None)
         assert key, self.error_msgs['no_key']
         self.key = key
-        self.config = config or {}
         self._init_gmap()
 
     def _init_gmap(self):

@@ -21,7 +21,8 @@ setup(
     install_requires=[
         'Django>=1.11',
         'googlemaps>=2.5.0',
-        'jsonfield'
+        'jsonfield',
+        'unidecode'
     ],
     classifiers=[
         'Environment :: Web Environment',

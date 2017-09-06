@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.utils import six
-import json
 
 from .base import BaseGMap
 from ..models import GMapPointCache, GMapDirectionCache
