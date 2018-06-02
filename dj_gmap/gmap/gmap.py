@@ -142,5 +142,6 @@ class GMapClient(BaseGMap):
             mode=mode, **kwargs
         )
         if direction and not ignore_cache:
+            GMapDirectionCache.objects.filter(id=id).delete()
             GMapDirectionCache.objects.create(id=id, data=direction)
         return direction
