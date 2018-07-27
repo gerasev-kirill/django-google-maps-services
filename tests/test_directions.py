@@ -21,7 +21,6 @@ class TestGmapHelper(TestCase):
 
 
 
-
     def test_directions(self):
         self.assertEqual(len(gmap_history), 0)
         res = self.G.directions('Paris', 'Amsterdam', mode='driving')
@@ -36,4 +35,35 @@ class TestGmapHelper(TestCase):
         self.assertEqual(
             res,
             self.client.directions('Paris', 'Amsterdam', mode='driving')
+        )
+
+
+    def test_directions_statistics(self):
+        res = self.G.directions(u'Киев', u'Берлин', mode='driving')
+        stat = self.G.direction_statistics_by_country(res[0])
+        #print json.dumps(stat)
+        self.assertEqual(
+            len(stat),
+            3
+        )
+        self.assertEqual(
+            stat[0]['short_name'],
+            'UA' # ukraine
+        )
+        self.assertTrue(
+            520000 > stat[0]['distance'] > 510000
+        )
+        self.assertEqual(
+            stat[1]['short_name'],
+            'PL' # poland
+        )
+        self.assertTrue(
+            727000 > stat[1]['distance'] > 726000
+        )
+        self.assertEqual(
+            stat[2]['short_name'],
+            'DE' # germany
+        )
+        self.assertTrue(
+            103000 > stat[2]['distance'] > 102000
         )
