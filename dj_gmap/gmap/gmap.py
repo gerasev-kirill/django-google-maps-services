@@ -18,6 +18,13 @@ def find_country_name(gmap_point_data):
             data['short_name'] = c['short_name']
     return data
 
+def find_city_name(gmap_point_data):
+    city = None
+    for c in gmap_point_data['address_components']:
+        if 'political' in c['types'] and 'locality' in c['types']:
+            city = c['long_name']
+    return city
+
 
 
 
@@ -103,19 +110,47 @@ class GMapClient(BaseGMap):
         if not isinstance(_points, (list, tuple)):
             _points = [_points]
 
-        for p in self.geocode(_points, ignore_cache=ignore_cache):
-            if not p:
-                raise exceptions.EmptyGeocodeResult(
-                    self.map_error_msgs['empty_geocode_result'].format(search_string=_points[i])
-                )
+        def find_country_city_name(geocoded_info):
             country = None
             city = None
-            for ac in p[0].get('address_components', []):
+            for ac in geocoded_info.get('address_components', []):
                 types = ac.get('types', [])
                 if 'political' in types and 'locality' in types:
                     city = ac['long_name']
                 if 'political' in types and 'country' in types:
                     country = ac['long_name']
+                if city and country:
+                    break
+            return country, city
+
+        for _p in self.geocode(_points, ignore_cache=ignore_cache):
+            if not _p:
+                raise exceptions.EmptyGeocodeResult(
+                    self.map_error_msgs['empty_geocode_result'].format(search_string=_points[i])
+                )
+            country = None
+            city = None
+            for p in _p:
+                _country, _city = find_country_city_name(p)
+                if _country:
+                    country = _country
+                if _city:
+                    city = _city
+
+            if not country or not city:
+                res = self._run_gmap_command(
+                    'reverse_geocode',
+                    (
+                        _p[0]['geometry']['location']['lat'],
+                        _p[0]['geometry']['location']['lng']
+                    )
+                )
+                for p in res:
+                    _country, _city = find_country_city_name(p)
+                    if _country:
+                        country = _country
+                    if _city:
+                        city = _city
             if not city or not country:
                 raise exceptions.NoCityNameInGeocodeResult(
                     self.map_error_msgs['no_city_in_geocode_result'].format(search_string=_points[i])
@@ -179,9 +214,14 @@ class GMapClient(BaseGMap):
         current_country = None
         for leg in direction_data['legs']:
             if not current_country:
+                point = self._run_gmap_command(
+                    'reverse_geocode',
+                    (leg['start_location']['lat'], leg['start_location']['lng'])
+                )[0]
                 current_country = self.geocode_country_only(
-                    leg['start_address']
+                    find_city_name(point)
                 )
+
 
             i = 0
             for step in leg['steps']:
