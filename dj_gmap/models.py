@@ -25,7 +25,7 @@ class GMapPointCache(models.Model):
 
 class GMapDirectionCache(models.Model):
     id = models.CharField(
-        max_length=(4+2+DJANGO_GC_MAP_POINT_PRECISION)*25+2+10,
+        max_length=(4+2+DJANGO_GC_MAP_POINT_PRECISION)*30+2+10,
         primary_key=True
     )
     created = models.DateTimeField(auto_now_add=True)
