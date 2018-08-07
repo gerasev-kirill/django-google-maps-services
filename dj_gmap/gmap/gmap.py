@@ -195,6 +195,50 @@ class GMapClient(BaseGMap):
                 return point.data
             except GMapDirectionCache.DoesNotExist:
                 pass
+        # https://developers.google.com/maps/documentation/directions/usage-and-billing
+        MAX_ALLOWED_WAYPOINTS = 23
+
+        if len(waypoints or []) > MAX_ALLOWED_WAYPOINTS:
+            complex_direction = []
+            j = 0
+            for i in range(0, len(waypoints), MAX_ALLOWED_WAYPOINTS):
+                chunk = waypoints[i : i+MAX_ALLOWED_WAYPOINTS]
+                if not i:
+                    # first iteration
+                    _origin = origin
+                    _destination = chunk.pop()
+                else:
+                    # any other iteration
+                    prev_chunk = waypoints[i-MAX_ALLOWED_WAYPOINTS : i]
+                if i + MAX_ALLOWED_WAYPOINTS >= len(waypoints):
+                    # last iteration
+                    _origin = prev_chunk[-1]
+                    _destination = destination
+                elif i:
+                    # not first and not last iteration
+                    _origin = prev_chunk[-1]
+                    _destination = chunk.pop()
+                #print '-----------------'
+                #print _origin, ' | ', _destination, ' | ', chunk
+                response = self.directions(
+                    _origin, _destination, waypoints=chunk,
+                    optimize_waypoints=optimize_waypoints, mode=mode,
+                    ignore_cache=ignore_cache, **kwargs
+                )
+                if not complex_direction:
+                    response = response[0]
+                    del response['overview_polyline']
+                    del response['waypoint_order']
+                    del response['bounds']
+                    response['warnings'].append('Merged by django-google-maps-services')
+                    complex_direction.append(response)
+                    continue
+                # merge old response and new
+                response = response[0]
+                complex_direction[0]['legs'] += response['legs']
+            #with open('./gmap_complex.json', 'w') as f:
+            #    json.dump(complex_direction, f, indent=4)
+            return complex_direction
 
         direction = self._run_gmap_command(
             'directions',
@@ -230,14 +274,10 @@ class GMapClient(BaseGMap):
                     nextStep = leg['steps'][i]
                 except:
                     nextStep = None
-                #print current_country
                 current_country['distance'] = current_country.get('distance', 0)
                 current_country['distance'] += step['distance']['value']
-                #print step['distance']['text']
-                if 'entering ' in step.get('html_instructions', '').lower():
-                    #print '==========================='
-                    #print step['html_instructions']
 
+                if 'entering ' in step.get('html_instructions', '').lower():
                     point = self._run_gmap_command(
                         'reverse_geocode',
                         (nextStep['start_location']['lat'], nextStep['start_location']['lng'])

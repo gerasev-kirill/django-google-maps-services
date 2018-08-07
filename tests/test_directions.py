@@ -36,6 +36,25 @@ class TestGmapHelper(TestCase):
             res,
             self.client.directions('Paris', 'Amsterdam', mode='driving')
         )
+        #
+        big_route = [
+            'Malaya Arnautskaya 5, Odessa, Ukraine',
+            'Shevchenko 5, Dnipro, Ukraine',
+            'Khreschatyk 5, Kiev, Ukraine'
+        ] * 10
+        res = self.G.directions('Paris', 'Amsterdam', waypoints=big_route, mode='driving')
+        legs = res[0]['legs']
+
+        # module will do 2 requests to google maps
+        self.assertEqual(len(gmap_history), 3)
+        self.assertIn(
+            'Paris',
+            legs[0]['start_address']
+        )
+        self.assertIn(
+            'Amsterdam',
+            legs[-1]['end_address']
+        )
 
 
     def test_directions_statistics(self):
