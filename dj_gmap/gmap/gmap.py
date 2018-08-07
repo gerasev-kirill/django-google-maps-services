@@ -197,6 +197,7 @@ class GMapClient(BaseGMap):
                 pass
         # https://developers.google.com/maps/documentation/directions/usage-and-billing
         MAX_ALLOWED_WAYPOINTS = 23
+        MAX_ID_LENGTH = GMapDirectionCache._meta.get_field('id').max_length
 
         if len(waypoints or []) > MAX_ALLOWED_WAYPOINTS:
             complex_direction = []
@@ -246,7 +247,7 @@ class GMapClient(BaseGMap):
             waypoints=waypoints, optimize_waypoints=optimize_waypoints,
             mode=mode, **kwargs
         )
-        if direction and not ignore_cache:
+        if direction and not ignore_cache and len(id) < MAX_ID_LENGTH:
             GMapDirectionCache.objects.filter(id=id).delete()
             GMapDirectionCache.objects.create(id=id, data=direction)
         return direction
