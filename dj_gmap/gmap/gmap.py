@@ -263,9 +263,7 @@ class GMapClient(BaseGMap):
                     'reverse_geocode',
                     (leg['start_location']['lat'], leg['start_location']['lng'])
                 )[0]
-                current_country = self.geocode_country_only(
-                    find_city_name(point)
-                )
+                current_country = find_country_name(point)
 
 
             i = 0
