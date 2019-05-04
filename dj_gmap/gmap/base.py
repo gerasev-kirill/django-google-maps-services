@@ -50,7 +50,7 @@ class BaseGMap(object):
                 ))
             self.gmap_attempts = 0
             return res
-        except googlemaps.exceptions.TransportError, e:
+        except googlemaps.exceptions.TransportError as e:
             self.gmap_attempts += 1
             if self.gmap_attempts > 10:
                 raise googlemaps.exceptions.TransportError(e)
