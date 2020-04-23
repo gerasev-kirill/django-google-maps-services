@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.utils import six
-import json
+import json, datetime
 
 from .base import BaseGMap
 from ..models import GMapPointCache, GMapDirectionCache
@@ -25,7 +25,12 @@ def find_city_name(gmap_point_data):
             city = c['long_name']
     return city
 
-
+def unwrap_coordinate_to_text(coordinate):
+    if isinstance(coordinate, six.string_types) or isinstance(coordinate, six.text_type):
+        return coordinate
+    if isinstance(coordinate, dict) and coordinate.get('text', None):
+        return coordinate['text']
+    return None
 
 
 class GMapClient(BaseGMap):
@@ -190,8 +195,9 @@ class GMapClient(BaseGMap):
                 id.append(self._location_to_str(w))
             id.append(self._location_to_str(destination))
             id = '#' + '#'.join(id) + '#'
+            max_date = datetime.datetime.now() - datetime.timedelta(days=10)
             try:
-                point = GMapDirectionCache.objects.get(id=id)
+                point = GMapDirectionCache.objects.get(id=id, created__gte=max_date)
                 return point.data
             except GMapDirectionCache.DoesNotExist:
                 pass
@@ -201,7 +207,7 @@ class GMapClient(BaseGMap):
 
         if len(waypoints or []) > MAX_ALLOWED_WAYPOINTS:
             complex_direction = []
-            j = 0
+            #j = 0
             for i in range(0, len(waypoints), MAX_ALLOWED_WAYPOINTS):
                 chunk = waypoints[i : i+MAX_ALLOWED_WAYPOINTS]
                 if not i:
@@ -247,6 +253,25 @@ class GMapClient(BaseGMap):
             waypoints=waypoints, optimize_waypoints=optimize_waypoints,
             mode=mode, **kwargs
         )
+        if not direction:
+            '''
+                какой-то баг в библиотеке. почему-то игнорятся иногда
+                если точки не текст
+            '''
+            _origin = unwrap_coordinate_to_text(origin)
+            _destination = unwrap_coordinate_to_text(destination)
+            _waypoints = [
+                unwrap_coordinate_to_text(w)
+                for w in waypoints or []
+            ]
+            if origin != _origin and destination != _destination:
+                direction = self._run_gmap_command(
+                    'directions',
+                    _origin, _destination,
+                    waypoints=_waypoints, optimize_waypoints=optimize_waypoints,
+                    mode=mode, **kwargs
+                )
+
         if direction and not ignore_cache and len(id) < MAX_ID_LENGTH:
             GMapDirectionCache.objects.filter(id=id).delete()
             GMapDirectionCache.objects.create(id=id, data=direction)
