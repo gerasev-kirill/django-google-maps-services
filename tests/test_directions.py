@@ -70,19 +70,19 @@ class TestGmapHelper(TestCase):
             'UA' # ukraine
         )
         self.assertTrue(
-            520000 > stat[0]['distance'] > 510000
+            520000 > stat[0]['distance'] > 505000
         )
         self.assertEqual(
             stat[1]['short_name'],
             'PL' # poland
         )
         self.assertTrue(
-            727000 > stat[1]['distance'] > 726000
+            741000 > stat[1]['distance'] > 726000
         )
         self.assertEqual(
             stat[2]['short_name'],
             'DE' # germany
         )
         self.assertTrue(
-            103000 > stat[2]['distance'] > 102000
+            103000 > stat[2]['distance'] > 101000
         )

@@ -83,11 +83,11 @@ class TestGmapHelper(TestCase):
         # amsterdam coordinates
         self.assertEqual(
             res[1][0]['geometry']['location']['lat'],
-            52.3702157
+            52.3675734
         )
         self.assertEqual(
             res[1][0]['geometry']['location']['lng'],
-            4.895167900000001
+            4.9041389
         )
 
         # fetch multiple locations from cache

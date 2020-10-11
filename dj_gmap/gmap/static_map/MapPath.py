@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.utils import six
-from unidecode import unidecode
-import json, re
 import googlemaps
+import six
 
 
 bool_to_str = lambda x: 'true' if x else 'false'
@@ -29,7 +27,10 @@ class MapPath(object):
         if weight:
             weight = abs(int(weight))
             if weight:
-                self.weight = unicode(weight)
+                if six.PY2:
+                    self.weight = unicode(weight)
+                else:
+                    self.weight = str(weight)
         self.color = color or 'red'
 
 

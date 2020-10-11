@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import six
 import googlemaps, time, sys
 from django.conf import settings
-from django.utils import six
 from decimal import Decimal
 from ..models import DJANGO_GC_MAP_POINT_PRECISION
 

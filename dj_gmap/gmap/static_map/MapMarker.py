@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.utils import six
+import six
 from unidecode import unidecode
-import json, re
 import googlemaps
 import urllib
 
@@ -44,7 +43,10 @@ class MapMarker(object):
 
     def _normalize_marker_label(self, label):
         if isinstance(label, int):
-            label = unicode(label)
+            if six.PY2:
+                label = unicode(label)
+            else:
+                label = str(label)
         if not isinstance(label, six.text_type) and not isinstance(label, six.string_types):
             raise TypeError(
                 self.error_msgs['invalid_label_type'].format(
