@@ -16,7 +16,7 @@ requirements = [
 
 try:
     import django
-    if django.VERSION[0] >= (3,1,0):
+    if django.VERSION >= (3,1,0):
         pass
     else:
         requirements.append('jsonfield')
