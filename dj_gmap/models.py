@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.db import models
+import json
 from .fields import JSONField
 
 DJANGO_GC_MAP_POINT_PRECISION = 7
@@ -20,6 +21,12 @@ class GMapPointCache(models.Model):
     )
     data = JSONField(default=[])
 
+    def get_data(self):
+        if not isinstance(self.data, (dict, list)):
+            self.data = json.loads(self.data)
+            self.save(update_fields=['data'])
+        return self.data
+
 
 
 class GMapDirectionCache(models.Model):
@@ -29,3 +36,9 @@ class GMapDirectionCache(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True)
     data = JSONField(default=[])
+
+    def get_data(self):
+        if not isinstance(self.data, (dict, list)):
+            self.data = json.loads(self.data)
+            self.save(update_fields=['data'])
+        return self.data

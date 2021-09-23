@@ -60,7 +60,7 @@ class TestGmapHelper(TestCase):
     def test_directions_statistics(self):
         res = self.G.directions(u'Киев', u'Берлин', mode='driving')
         stat = self.G.direction_statistics_by_country(res[0])
-        #print json.dumps(stat)
+        #print(json.dumps(stat))
         self.assertEqual(
             len(stat),
             3
@@ -77,7 +77,7 @@ class TestGmapHelper(TestCase):
             'PL' # poland
         )
         self.assertTrue(
-            741000 > stat[1]['distance'] > 726000
+            742000 > stat[1]['distance'] > 726000
         )
         self.assertEqual(
             stat[2]['short_name'],

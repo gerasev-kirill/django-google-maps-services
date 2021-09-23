@@ -43,7 +43,7 @@ class GMapClient(BaseGMap):
         if not ignore_cache:
             try:
                 point = GMapPointCache.objects.get(id=single_point)
-                return point.data
+                return point.get_data()
             except GMapPointCache.DoesNotExist:
                 pass
 
@@ -67,7 +67,7 @@ class GMapClient(BaseGMap):
         if not ignore_cache:
             try:
                 point = GMapPointCache.objects.get(id="#C# "+single_point)
-                return point.data
+                return point.get_data()
             except GMapPointCache.DoesNotExist:
                 pass
 
@@ -197,7 +197,7 @@ class GMapClient(BaseGMap):
             max_date = datetime.datetime.now() - datetime.timedelta(days=10)
             try:
                 point = GMapDirectionCache.objects.get(id=id, created__gte=max_date)
-                return point.data
+                return point.get_data()
             except GMapDirectionCache.DoesNotExist:
                 pass
         # https://developers.google.com/maps/documentation/directions/usage-and-billing
@@ -281,6 +281,16 @@ class GMapClient(BaseGMap):
     def direction_statistics_by_country(self, direction_data):
         statistics = []
         current_country = None
+        check_current_country_paranoid_mode = False
+
+        def get_country(step_location):
+            point = self._run_gmap_command(
+                'reverse_geocode',
+                (step_location['lat'], step_location['lng'])
+            )[0]
+            return find_country_name(point)
+
+
         for leg in direction_data['legs']:
             if not current_country:
                 point = self._run_gmap_command(
@@ -301,24 +311,39 @@ class GMapClient(BaseGMap):
                 current_country['distance'] += step['distance']['value']
 
                 if 'entering ' in step.get('html_instructions', '').lower():
-                    point = self._run_gmap_command(
-                        'reverse_geocode',
-                        (nextStep['start_location']['lat'], nextStep['start_location']['lng'])
-                    )[0]
-                    country = find_country_name(point)
+                    country = get_country(nextStep['start_location'])
                     if current_country['short_name'] != country['short_name']:
                         statistics.append(current_country)
                         current_country = country
+                        check_current_country_paranoid_mode = False
                         continue
 
-                    point = self._run_gmap_command(
-                        'reverse_geocode',
-                        (nextStep['end_location']['lat'], nextStep['end_location']['lng'])
-                    )[0]
-                    country = find_country_name(point)
+                    country = get_country(nextStep['end_location'])
                     if current_country['short_name'] != country['short_name']:
                         statistics.append(current_country)
                         current_country = country
+                        check_current_country_paranoid_mode = False
+                        continue
+                    # the country should have changed, but this did not happen
+                    check_current_country_paranoid_mode = True
+                    continue
+
+                if check_current_country_paranoid_mode and nextStep:
+                    country = get_country(nextStep['start_location'])
+                    if current_country['short_name'] != country['short_name']:
+                        statistics.append(current_country)
+                        current_country = country
+                        check_current_country_paranoid_mode = False
+                        continue
+
+                    country = get_country(nextStep['end_location'])
+                    if current_country['short_name'] != country['short_name']:
+                        statistics.append(current_country)
+                        current_country = country
+                        check_current_country_paranoid_mode = False
+                        continue
+
+
 
         statistics.append(current_country)
         return statistics
