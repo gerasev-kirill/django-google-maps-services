@@ -309,6 +309,8 @@ class GMapClient(BaseGMap):
                     nextStep = None
                 current_country['distance'] = current_country.get('distance', 0)
                 current_country['distance'] += step['distance']['value']
+                if not nextStep:
+                    continue
 
                 if 'entering ' in step.get('html_instructions', '').lower():
                     country = get_country(nextStep['start_location'])
