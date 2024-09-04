@@ -312,7 +312,9 @@ class GMapClient(BaseGMap):
                 if not nextStep:
                     continue
 
-                if 'entering ' in step.get('html_instructions', '').lower():
+                # обход бага с неверным определением смены страны
+                step_text = step.get('html_instructions', '').lower()
+                if 'entering ' in step_text and 'entering toll ' not in step_text:
                     country = get_country(nextStep['start_location'])
                     if current_country['short_name'] != country['short_name']:
                         statistics.append(current_country)
