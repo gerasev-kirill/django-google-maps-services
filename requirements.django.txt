@@ -16,7 +16,7 @@ pyOpenSSL==17.2.0
 pyasn1==0.3.3
 pycparser==2.18
 pytz==2017.2
-requests==2.18.4
+requests==2.20.0
 six==1.10.0
 urllib3==1.22
 #wsgiref==0.1.2
